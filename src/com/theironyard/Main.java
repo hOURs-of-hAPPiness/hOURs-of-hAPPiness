@@ -1,4 +1,4 @@
-package com.thgiteironyard;
+package com.theironyard;
 
 public class Main {
 
