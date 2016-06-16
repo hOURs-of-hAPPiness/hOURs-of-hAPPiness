@@ -7,11 +7,13 @@ public class Review {
     Integer reviewId;
     String review;
     Integer rating;
+    String author;
 
-    public Review(Integer reviewId, String review, Integer rating) {
+    public Review(Integer reviewId, String review, Integer rating, String author) {
         this.reviewId = reviewId;
         this.review = review;
         this.rating = rating;
+        this.author = author;
     }
 
     public Review() {
@@ -39,5 +41,13 @@ public class Review {
 
     public void setRating(Integer rating) {
         this.rating = rating;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
     }
 }
