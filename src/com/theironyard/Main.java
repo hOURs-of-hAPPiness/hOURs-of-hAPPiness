@@ -11,8 +11,8 @@ public class Main {
     public static void createTables (Connection conn) throws SQLException {
         Statement stmt = conn.createStatement();
         stmt.execute("CREATE TABLES IF NOT EXISTS users (userId IDENTITY, username VARCHAR)");
-        stmt.execute("CREATE TABLES IF NOT EXISTS bars (barId IDENTITY, barName VARCHAR, barLocation VARCHAR)");
-        stmt.execute("CREATE TABLES IF NOT EXISTS reviews(reviewId IDENTITY, review VARCHAR, rating INT, author VARCHAR)");
+        stmt.execute("CREATE TABLES IF NOT EXISTS bars (barId IDENTITY, barName VARCHAR, barLocation VARCHAR user_id INT)");
+        stmt.execute("CREATE TABLES IF NOT EXISTS reviews(reviewId IDENTITY, review VARCHAR, rating INT, author VARCHAR bar_id INT)");
     }
 
     public static void insertUser (Connection conn, String username) throws SQLException {
@@ -52,7 +52,7 @@ public class Main {
     }
 
     public static ArrayList<Bar> selectBars(Connection conn, Integer userId) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement("SELECT * FROM bars INNER JOIN users ON bars.user_id = users.id WHERE users.id = ?");
+        PreparedStatement stmt = conn.prepareStatement("SELECT * FROM bars INNER JOIN users ON bars.user_id = users.userId WHERE users.userId = ?");
         stmt.setInt(1, userId);
         ResultSet results = stmt.executeQuery();
         ArrayList<Bar> bars = new ArrayList<>();
@@ -102,7 +102,7 @@ public class Main {
     }
 
     public static ArrayList<Review> selectReviews(Connection conn, Integer barId) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement("SELECT * FROM reviews INNER JOIN bars ON reviews.bar_id = bars.id WHERE bars.id = ?");
+        PreparedStatement stmt = conn.prepareStatement("SELECT * FROM reviews INNER JOIN bars ON reviews.bar_id = bars.barId WHERE bars.barId = ?");
         stmt.setInt(1, barId);
         ResultSet results = stmt.executeQuery();
         ArrayList<Review> reviewList = new ArrayList<>();
