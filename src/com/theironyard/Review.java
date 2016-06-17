@@ -6,10 +6,10 @@ package com.theironyard;
 public class Review {
     Integer reviewId;
     String review;
-    Integer rating;
+    int rating;
     String author;
 
-    public Review(Integer reviewId, String review, Integer rating, String author) {
+    public Review(Integer reviewId, String review, int rating, String author) {
         this.reviewId = reviewId;
         this.review = review;
         this.rating = rating;
@@ -39,7 +39,7 @@ public class Review {
         return rating;
     }
 
-    public void setRating(Integer rating) {
+    public void setRating(int rating) {
         this.rating = rating;
     }
 
