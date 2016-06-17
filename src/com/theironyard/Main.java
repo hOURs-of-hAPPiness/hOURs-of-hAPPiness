@@ -14,14 +14,14 @@ public class Main {
 
     public static void createTables (Connection conn) throws SQLException {
         Statement stmt = conn.createStatement();
-        stmt.execute("CREATE TABLES IF NOT EXISTS users (userId IDENTITY, username VARCHAR)");
-        stmt.execute("CREATE TABLES IF NOT EXISTS bars (barId IDENTITY, barName VARCHAR, barLocation VARCHAR, author VARCHAR, user_id INT)");
-        stmt.execute("CREATE TABLES IF NOT EXISTS reviews(reviewId IDENTITY, review VARCHAR, rating INT, author VARCHAR, bar_id INT)");
+        stmt.execute("CREATE TABLE IF NOT EXISTS users (userId IDENTITY, username VARCHAR)");
+        stmt.execute("CREATE TABLE IF NOT EXISTS bars (barId IDENTITY, barName VARCHAR, barLocation VARCHAR, author VARCHAR, user_id INT)");
+        stmt.execute("CREATE TABLE IF NOT EXISTS reviews(reviewId IDENTITY, review VARCHAR, rating INT, author VARCHAR, bar_id INT)");
     }
 
-    public static void insertUser (Connection conn, String username) throws SQLException {
+    public static void insertUser (Connection conn, User user) throws SQLException {
         PreparedStatement stmt = conn.prepareStatement("INSERT INTO users VALUES (NULL, ?)");
-        stmt.setString(1, username);
+        stmt.setString(1, user.username);
         stmt.execute();
     }
 
@@ -37,9 +37,10 @@ public class Main {
     }
 
     public static void insertBar (Connection conn, Bar bar) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement("INSERT INTO bars VALUES (NULL, ?, ?)");
+        PreparedStatement stmt = conn.prepareStatement("INSERT INTO bars VALUES (NULL, ?, ?, ?)");
         stmt.setString(1, bar.barName);
         stmt.setString(2, bar.barLocation);
+        stmt.setString(3, bar.imageUrl);
         stmt.execute();
     }
 
@@ -57,8 +58,9 @@ public class Main {
         return null;
     }
 
-    public static ArrayList<Bar> selectBars(Connection conn) throws SQLException {
+    public static ArrayList<Bar> selectBars(Connection conn, Integer userId) throws SQLException {
         PreparedStatement stmt = conn.prepareStatement("SELECT * FROM bars INNER JOIN users ON bars.user_id = users.userId WHERE users.userId = ?");
+        stmt.setInt(1, userId);
         ResultSet results = stmt.executeQuery();
         ArrayList<Bar> bars = new ArrayList<>();
         while (results.next()) {
@@ -73,11 +75,12 @@ public class Main {
         return bars;
     }
 
-    public static void updateBar (Connection conn, Integer barId, String barName, String barLocation) throws SQLException {
+    public static void updateBar (Connection conn, Bar bar) throws SQLException {
         PreparedStatement stmt = conn.prepareStatement("UPDATE bars SET barName = ?, barLocation = ? WHERE barId = ?");
-        stmt.setInt(1, barId);
-        stmt.setString(2, barName);
-        stmt.setString(3, barLocation);
+        stmt.setInt(1, bar.barId);
+        stmt.setString(2, bar.barName);
+        stmt.setString(3, bar.barLocation);
+        stmt.setString(4, bar.imageUrl);
         stmt.execute();
     }
 
@@ -87,11 +90,11 @@ public class Main {
         stmt.execute();
     }
 
-    public static void insertReview (Connection conn, String review, int rating, String author) throws SQLException {
+    public static void insertReview (Connection conn, Review review) throws SQLException {
         PreparedStatement stmt = conn.prepareStatement("INSERT INTO reviews VALUES (NULL, ?, ?, ?)");
-        stmt.setString(1, review);
-        stmt.setInt(2, rating);
-        stmt.setString(3, author);
+        stmt.setString(1, review.review);
+        stmt.setInt(2, review.rating);
+        stmt.setString(3, review.author);
         stmt.execute();
     }
 
@@ -108,8 +111,9 @@ public class Main {
         return null;
     }
 
-    public static ArrayList<Review> selectReviews(Connection conn) throws SQLException {
+    public static ArrayList<Review> selectReviews(Connection conn, Integer barId) throws SQLException {
         PreparedStatement stmt = conn.prepareStatement("SELECT * FROM reviews INNER JOIN bars ON reviews.bar_id = bars.barId WHERE bars.barId = ?");
+        stmt.setInt(1, barId);
         ResultSet results = stmt.executeQuery();
         ArrayList<Review> reviewList = new ArrayList<>();
         while (results.next()) {
@@ -123,12 +127,12 @@ public class Main {
         return reviewList;
     }
 
-    public static void updateReview (Connection conn, Integer reviewId, String review, int rating, String author) throws SQLException {
+    public static void updateReview (Connection conn, Review review) throws SQLException {
         PreparedStatement stmt = conn.prepareStatement("UPDATE reviews SET review = ?, rating = ?, author = ? WHERE reviewId = ?");
-        stmt.setInt(1, reviewId);
-        stmt.setString(2, review);
-        stmt.setInt(3, rating);
-        stmt.setString(4, author);
+        stmt.setInt(1, review.reviewId);
+        stmt.setString(2, review.review);
+        stmt.setInt(3, review.rating);
+        stmt.setString(4, review.author);
         stmt.execute();
     }
 
@@ -141,20 +145,46 @@ public class Main {
     public static void main(String[] args) throws SQLException {
         Server.createWebServer().start();
         Connection conn = DriverManager.getConnection("jdbc:h2:./main");
+
+        Spark.externalStaticFileLocation("public");
+
         createTables(conn);
 
         JsonParser parser = new JsonParser();
         JsonSerializer serializer = new JsonSerializer();
-
-
         Spark.init();
+
+        Spark.get("/get-bars",
+                (request, response) -> {
+                    Session session = request.session();
+                    String username = session.attribute("username");
+                    User user = selectUser(conn, username);
+                    ArrayList<Bar> bars = selectBars(conn, user.userId);
+                    return serializer.serialize(bars);
+                }
+        );
+
+        Spark.get("/get-reviews",
+                (request, response) -> {
+                    Integer id = Integer.valueOf(request.params("reviewId"));
+                    selectReviews(conn, id);
+
+                    return "";
+                }
+        );
 
         Spark.post(
                 "/login",
                 (request, response) -> {
-
+                    String body = request.body();
+                    User user = parser.parse(body, User.class);
+                    Session session = request.session();
+                    session.attribute("username", user.username);
+                    insertUser(conn, user);
+                    return "";
                 }
         );
+
         Spark.post(
                 "/logout",
                 (request, response) -> {
@@ -164,6 +194,16 @@ public class Main {
                     return "";
                 }
         );
+
+        Spark.post("/create-bar",
+                (request, response) -> {
+                    String body = request.body();
+                    Bar bar = parser.parse(body, Bar.class);
+                    insertBar(conn, bar);
+                    return"";
+                }
+        );
+
         Spark.get(
                 "/get-bars",
                 (request, response) -> {
@@ -171,12 +211,30 @@ public class Main {
                     return serializer.serialize(bars);
                 }
         );
-        Spark.post(
-                "/add-bars",
+
+        Spark.post("/create-review",
+                (request, response) -> {
+                    String body = request.body();
+                    Review review = parser.parse(body, Review.class);
+                    insertReview(conn, review);
+                    return"";
+                }
+        );
+
+        Spark.put("/edit-bar",
                 (request, response) -> {
                     String body = request.body();
                     Bar bar = parser.parse(body, Bar.class);
-                    insertBar(conn, bar);
+                    updateBar(conn, bar);
+                    return "";
+                }
+        );
+
+        Spark.put("/edit-review",
+                (request, response) -> {
+                    String body = request.body();
+                    Review review = parser.parse(body, Review.class);
+                    updateReview(conn, review);
                     return "";
                 }
         );
@@ -200,6 +258,15 @@ public class Main {
                     return "";
                 }
         );
+
+        Spark.delete("/delete-review",
+                (request, response) -> {
+                    Integer reviewId = Integer.valueOf(request.params("reviewId"));
+                    deleteReview(conn, reviewId);
+                    return "";
+                }
+        );
+
     }
 
 
