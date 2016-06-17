@@ -1,7 +1,9 @@
 package com.theironyard;
 
 import jodd.json.JsonParser;
+import jodd.json.JsonSerializer;
 import org.h2.tools.Server;
+import spark.Session;
 import spark.Spark;
 
 import java.sql.*;
@@ -13,8 +15,8 @@ public class Main {
     public static void createTables (Connection conn) throws SQLException {
         Statement stmt = conn.createStatement();
         stmt.execute("CREATE TABLES IF NOT EXISTS users (userId IDENTITY, username VARCHAR)");
-        stmt.execute("CREATE TABLES IF NOT EXISTS bars (barId IDENTITY, barName VARCHAR, barLocation VARCHAR user_id INT)");
-        stmt.execute("CREATE TABLES IF NOT EXISTS reviews(reviewId IDENTITY, review VARCHAR, rating INT, author VARCHAR bar_id INT)");
+        stmt.execute("CREATE TABLES IF NOT EXISTS bars (barId IDENTITY, barName VARCHAR, barLocation VARCHAR, author VARCHAR, user_id INT)");
+        stmt.execute("CREATE TABLES IF NOT EXISTS reviews(reviewId IDENTITY, review VARCHAR, rating INT, author VARCHAR, bar_id INT)");
     }
 
     public static void insertUser (Connection conn, String username) throws SQLException {
@@ -34,10 +36,10 @@ public class Main {
         return null;
     }
 
-    public static void insertBar (Connection conn, String barName, String barLocation) throws SQLException {
+    public static void insertBar (Connection conn, Bar bar) throws SQLException {
         PreparedStatement stmt = conn.prepareStatement("INSERT INTO bars VALUES (NULL, ?, ?)");
-        stmt.setString(1, barName);
-        stmt.setString(2, barLocation);
+        stmt.setString(1, bar.barName);
+        stmt.setString(2, bar.barLocation);
         stmt.execute();
     }
 
@@ -48,21 +50,24 @@ public class Main {
         if (results.next()) {
             String barName = results.getString("barName");
             String barLocation = results.getString("barLocation");
-            return new Bar(barId, barName, barLocation);
+            String imageUrl = results.getString("imageUrl");
+            String author = results.getString("author");
+            return new Bar(barId, barName, barLocation, imageUrl, author);
         }
         return null;
     }
 
-    public static ArrayList<Bar> selectBars(Connection conn, Integer userId) throws SQLException {
+    public static ArrayList<Bar> selectBars(Connection conn) throws SQLException {
         PreparedStatement stmt = conn.prepareStatement("SELECT * FROM bars INNER JOIN users ON bars.user_id = users.userId WHERE users.userId = ?");
-        stmt.setInt(1, userId);
         ResultSet results = stmt.executeQuery();
         ArrayList<Bar> bars = new ArrayList<>();
         while (results.next()) {
             Integer barId = results.getInt("barId");
             String barName = results.getString("barName");
             String barLocation = results.getString("barLocation");
-            Bar bar = new Bar(barId, barName, barLocation);
+            String imageUrl = results.getString("imageUrl");
+            String author = results.getString("author");
+            Bar bar = new Bar(barId, barName, barLocation, imageUrl, author);
             bars.add(bar);
         }
         return bars;
@@ -103,9 +108,8 @@ public class Main {
         return null;
     }
 
-    public static ArrayList<Review> selectReviews(Connection conn, Integer barId) throws SQLException {
+    public static ArrayList<Review> selectReviews(Connection conn) throws SQLException {
         PreparedStatement stmt = conn.prepareStatement("SELECT * FROM reviews INNER JOIN bars ON reviews.bar_id = bars.barId WHERE bars.barId = ?");
-        stmt.setInt(1, barId);
         ResultSet results = stmt.executeQuery();
         ArrayList<Review> reviewList = new ArrayList<>();
         while (results.next()) {
@@ -139,74 +143,63 @@ public class Main {
         Connection conn = DriverManager.getConnection("jdbc:h2:./main");
         createTables(conn);
 
+        JsonParser parser = new JsonParser();
+        JsonSerializer serializer = new JsonSerializer();
+
+
         Spark.init();
 
-        Spark.get("/get-bars",
+        Spark.post(
+                "/login",
                 (request, response) -> {
 
+                }
+        );
+        Spark.post(
+                "/logout",
+                (request, response) -> {
+                    Session session = request.session();
+                    session.invalidate();
+                    response.redirect("/");
                     return "";
                 }
         );
-
-        Spark.get("/get-reviews",
+        Spark.get(
+                "/get-bars",
                 (request, response) -> {
-
-                    return "";
+                    ArrayList<Bar> bars = selectBars(conn);
+                    return serializer.serialize(bars);
                 }
         );
-
-        Spark.post("/create-user",
+        Spark.post(
+                "/add-bars",
                 (request, response) -> {
                     String body = request.body();
-                    JsonParser p = new JsonParser();
-                    User user = p.parse(body, User.class);
-                    insertUser(conn, user);
-                    return"";
+                    Bar bar = parser.parse(body, Bar.class);
+                    insertBar(conn, bar);
+                    return "";
+                }
+        );
+
+        Spark.delete(
+                "/delete-bar/:id",
+                (request, response) -> {
+                    int barId = Integer.valueOf(request.params(":id"));
+
+                    Session session = request.session();
+                    String username = session.attribute("username");
+                    Bar b = selectBar(conn, barId);
+
+                    if (b.author.equals(username)) {
+                        throw new Exception("Unable to delete");
                     }
-        );
 
-        Spark.post("/create-bar",
-                (request, response) -> {
+                    deleteBar(conn, barId);
 
+                    response.redirect("/");
                     return "";
                 }
         );
-
-        Spark.post("/create-review",
-                (request, response) -> {
-
-                    return "";
-                }
-        );
-
-        Spark.put("/edit-bar",
-                (request, response) -> {
-
-                    return "";
-                }
-        );
-
-        Spark.put("/edit-review",
-                (request, response) -> {
-
-                    return "";
-                }
-        );
-
-        Spark.delete("/delete-bar",
-                (request, response) -> {
-
-                    return "";
-                }
-        );
-
-        Spark.delete("/delete-review",
-                (request, response) -> {
-
-                    return "";
-                }
-        );
-
     }
 
 
