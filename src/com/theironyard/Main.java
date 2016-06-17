@@ -58,9 +58,8 @@ public class Main {
         return null;
     }
 
-    public static ArrayList<Bar> selectBars(Connection conn, Integer userId) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement("SELECT * FROM bars INNER JOIN users ON bars.user_id = users.userId WHERE users.userId = ?");
-        stmt.setInt(1, userId);
+    public static ArrayList<Bar> selectBars(Connection conn) throws SQLException {
+        PreparedStatement stmt = conn.prepareStatement("SELECT * FROM bars INNER JOIN users ON bars.user_id = users.userId");
         ResultSet results = stmt.executeQuery();
         ArrayList<Bar> bars = new ArrayList<>();
         while (results.next()) {
@@ -154,33 +153,21 @@ public class Main {
         JsonSerializer serializer = new JsonSerializer();
         Spark.init();
 
-        Spark.get("/get-bars",
-                (request, response) -> {
-                    Session session = request.session();
-                    String username = session.attribute("username");
-                    User user = selectUser(conn, username);
-                    ArrayList<Bar> bars = selectBars(conn, user.userId);
-                    return serializer.serialize(bars);
-                }
-        );
-
-        Spark.get("/get-reviews",
-                (request, response) -> {
-                    Integer id = Integer.valueOf(request.params("reviewId"));
-                    selectReviews(conn, id);
-
-                    return "";
-                }
-        );
-
         Spark.post(
                 "/login",
                 (request, response) -> {
-                    String body = request.body();
-                    User user = parser.parse(body, User.class);
                     Session session = request.session();
-                    session.attribute("username", user.username);
-                    insertUser(conn, user);
+                    String username = session.attribute("username");
+                    if(username ==null) {
+                        String body = request.body();
+                        User newUser = parser.parse(body, User.class);
+
+                        User user = selectUser(conn, newUser.username);
+                        if (user == null){
+                            insertUser(conn, newUser);
+                        }
+                        session.attribute("username", newUser.username);
+                    }
                     return "";
                 }
         );
@@ -190,7 +177,6 @@ public class Main {
                 (request, response) -> {
                     Session session = request.session();
                     session.invalidate();
-                    response.redirect("/");
                     return "";
                 }
         );
@@ -212,6 +198,15 @@ public class Main {
                 }
         );
 
+        Spark.put("/edit-bar",
+                (request, response) -> {
+                    String body = request.body();
+                    Bar bar = parser.parse(body, Bar.class);
+                    updateBar(conn, bar);
+                    return "";
+                }
+        );
+
         Spark.post("/create-review",
                 (request, response) -> {
                     String body = request.body();
@@ -221,11 +216,11 @@ public class Main {
                 }
         );
 
-        Spark.put("/edit-bar",
+        Spark.get("/get-reviews/:id",
                 (request, response) -> {
-                    String body = request.body();
-                    Bar bar = parser.parse(body, Bar.class);
-                    updateBar(conn, bar);
+                    Integer id = Integer.valueOf(request.params(":id"));
+                    selectReviews(conn, id);
+
                     return "";
                 }
         );
@@ -242,32 +237,36 @@ public class Main {
         Spark.delete(
                 "/delete-bar/:id",
                 (request, response) -> {
-                    int barId = Integer.valueOf(request.params(":id"));
+                    int id = Integer.valueOf(request.params(":id"));
 
                     Session session = request.session();
                     String username = session.attribute("username");
-                    Bar b = selectBar(conn, barId);
+                    Bar b = selectBar(conn, id);
 
-                    if (b.author.equals(username)) {
+                    if (!b.author.equals(username)) {
                         throw new Exception("Unable to delete");
                     }
 
-                    deleteBar(conn, barId);
-
-                    response.redirect("/");
+                    deleteBar(conn, id);
                     return "";
                 }
         );
 
-        Spark.delete("/delete-review",
+        Spark.delete("/delete-review/:id",
                 (request, response) -> {
-                    Integer reviewId = Integer.valueOf(request.params("reviewId"));
+                    Integer reviewId = Integer.valueOf(request.params(":id"));
+
+                    Session session = request.session();
+                    String username = session.attribute("username");
+                    Review r = selectReview(conn, reviewId);
+
+                    if (!r.author.equals(username)) {
+                        throw new Exception("Unable to Delete");
+                    }
+
                     deleteReview(conn, reviewId);
                     return "";
                 }
         );
-
     }
-
-
 }
