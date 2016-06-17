@@ -8,12 +8,14 @@ public class Bar {
     String barName;
     String barLocation;
     String imageUrl;
+    String author;
 
-    public Bar(Integer barId, String barName, String barLocation, String imageUrl) {
+    public Bar(Integer barId, String barName, String barLocation, String imageUrl, String author) {
         this.barId = barId;
         this.barName = barName;
         this.barLocation = barLocation;
         this.imageUrl = imageUrl;
+        this.author = author;
     }
 
     public Bar() {
@@ -49,5 +51,13 @@ public class Bar {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
     }
 }
