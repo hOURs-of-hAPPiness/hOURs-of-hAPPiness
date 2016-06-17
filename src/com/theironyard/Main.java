@@ -1,6 +1,8 @@
 package com.theironyard;
 
+import jodd.json.JsonParser;
 import org.h2.tools.Server;
+import spark.Spark;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -135,6 +137,77 @@ public class Main {
     public static void main(String[] args) throws SQLException {
         Server.createWebServer().start();
         Connection conn = DriverManager.getConnection("jdbc:h2:./main");
+        createTables(conn);
+
+        Spark.init();
+
+        Spark.get("/get-bars",
+                (request, response) -> {
+
+                    return "";
+                }
+        );
+
+        Spark.get("/get-reviews",
+                (request, response) -> {
+
+                    return "";
+                }
+        );
+
+        Spark.post("/create-user",
+                (request, response) -> {
+                    String body = request.body();
+                    JsonParser p = new JsonParser();
+                    User user = p.parse(body, User.class);
+                    insertUser(conn, user);
+                    return"";
+                    }
+        );
+
+        Spark.post("/create-bar",
+                (request, response) -> {
+
+                    return "";
+                }
+        );
+
+        Spark.post("/create-review",
+                (request, response) -> {
+
+                    return "";
+                }
+        );
+
+        Spark.put("/edit-bar",
+                (request, response) -> {
+
+                    return "";
+                }
+        );
+
+        Spark.put("/edit-review",
+                (request, response) -> {
+
+                    return "";
+                }
+        );
+
+        Spark.delete("/delete-bar",
+                (request, response) -> {
+
+                    return "";
+                }
+        );
+
+        Spark.delete("/delete-review",
+                (request, response) -> {
+
+                    return "";
+                }
+        );
 
     }
+
+
 }
