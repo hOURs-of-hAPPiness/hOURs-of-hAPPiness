@@ -3,15 +3,39 @@ $('document').ready(function(){
 })
 
 var app = {
+  user: '',
   init: function(){
     app.styling();
     app.events();
+  },
+  loginSubmit: function(){
+    event.preventDefault();
+    app.user = $('input[name=username]').val();
+    var $password = $('input[type=password]').val();
+    console.log("shit submit", app.user);
+    if($password === 'poop') {
+      $('.login').fadeOut();
+      $('.hoh-main').removeClass("hidden").hide().fadeIn(2000);
+    } else {
+      $('input[type=password]').val('').attr('placeholder','wrong password!');
+    }
   },
   styling: function(){
 
   },
   events: function(){
-
+    //submit & store username and password on click
+    $('button[type=button]').on('click', function(event){
+      app.loginSubmit();
+    })
+    //submit & store username and password on enter
+    $('.login').on('keypress click', function(event){
+    var keyCode = event.keyCode || event.which;
+      if (keyCode === 13) {
+        app.loginSubmit();
+        return false;
+      }
+    })
   },
   create: function(stuff){
     $.ajax({
