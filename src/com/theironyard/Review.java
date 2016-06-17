@@ -35,7 +35,7 @@ public class Review {
         this.review = review;
     }
 
-    public Integer getRating() {
+    public int getRating() {
         return rating;
     }
 
