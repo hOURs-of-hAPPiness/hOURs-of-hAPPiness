@@ -5,9 +5,11 @@ $('document').ready(function(){
 var app = {
   user: '',
   init: function(){
-    app.styling();
     app.events();
+    app.styling();
   },
+  
+  //login function to be used on click and enter events.
   loginSubmit: function(){
     event.preventDefault();
     app.user = $('input[name=username]').val();
@@ -20,23 +22,33 @@ var app = {
       $('input[type=password]').val('').attr('placeholder','wrong password!');
     }
   },
+
   styling: function(){
+    // replaces default w/ username
+    $('.welcome').text(`${app.user}, Welcome to The Secret Society of Happiness`);
 
   },
   events: function(){
+
     //submit & store username and password on click
     $('button[type=button]').on('click', function(event){
       app.loginSubmit();
+      // change welcome message w/ user name
+      app.styling();
     })
+
     //submit & store username and password on enter
     $('.login').on('keypress click', function(event){
     var keyCode = event.keyCode || event.which;
       if (keyCode === 13) {
         app.loginSubmit();
+        // change welcome message w/ user name
+        app.styling();
         return false;
       }
     })
   },
+
   create: function(stuff){
     $.ajax({
       url: app.url,

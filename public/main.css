@@ -76,5 +76,27 @@ nav {
 .main-content {
   background-color: #A9A9A9;
   margin-top: 20px;
+  margin-bottom: 20px;
+  width: 100%; }
+
+footer {
+  background-color: #A9A9A9;
+  display: inline-flex;
+  position: fixed;
+  left: 0;
+  bottom: 0;
   width: 100%;
-  height: 100px; }
+  height: 80px;
+  justify-content: space-around; }
+  footer div {
+    margin-top: 5px;
+    display: inline-flex;
+    flex-direction: column;
+    text-align: center;
+    cursor: pointer; }
+    footer div:hover {
+      text-decoration: underline; }
+  footer img {
+    display: inline-block;
+    width: 50px;
+    height: 50px; }
