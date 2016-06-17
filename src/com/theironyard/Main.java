@@ -185,12 +185,30 @@ public class Main {
                 }
         );
 
+        Spark.post(
+                "/logout",
+                (request, response) -> {
+                    Session session = request.session();
+                    session.invalidate();
+                    response.redirect("/");
+                    return "";
+                }
+        );
+
         Spark.post("/create-bar",
                 (request, response) -> {
                     String body = request.body();
                     Bar bar = parser.parse(body, Bar.class);
                     insertBar(conn, bar);
                     return"";
+                }
+        );
+
+        Spark.get(
+                "/get-bars",
+                (request, response) -> {
+                    ArrayList<Bar> bars = selectBars(conn);
+                    return serializer.serialize(bars);
                 }
         );
 
@@ -221,10 +239,22 @@ public class Main {
                 }
         );
 
-        Spark.delete("/delete-bar",
+        Spark.delete(
+                "/delete-bar/:id",
                 (request, response) -> {
-                    Integer barId = Integer.valueOf(request.params("barId"));
+                    int barId = Integer.valueOf(request.params(":id"));
+
+                    Session session = request.session();
+                    String username = session.attribute("username");
+                    Bar b = selectBar(conn, barId);
+
+                    if (b.author.equals(username)) {
+                        throw new Exception("Unable to delete");
+                    }
+
                     deleteBar(conn, barId);
+
+                    response.redirect("/");
                     return "";
                 }
         );
