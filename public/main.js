@@ -108,6 +108,7 @@ var app = {
       method: "GET",
       success: function(data){
         console.log("X gonna give it to ya::reading", data);
+        data = JSON.parse(data);
         $('.bars').html('');
         data.forEach(function(element,idx){
           var barString = app.htmlGen(templates.barSummary, element)
