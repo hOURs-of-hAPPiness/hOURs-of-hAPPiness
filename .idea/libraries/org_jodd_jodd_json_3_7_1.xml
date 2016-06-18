@@ -5,6 +5,9 @@
       <root url="jar://$MAVEN_REPOSITORY$/org/jodd/jodd-json/3.7.1/jodd-json-3.7.1.jar!/" />
       <root url="jar://$MAVEN_REPOSITORY$/org/jodd/jodd-core/3.7.1/jodd-core-3.7.1.jar!/" />
       <root url="jar://$MAVEN_REPOSITORY$/org/jodd/jodd-bean/3.7.1/jodd-bean-3.7.1.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/jodd/jodd-json/3.7.1/jodd-json-3.7.1.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/jodd/jodd-core/3.7.1/jodd-core-3.7.1.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/jodd/jodd-bean/3.7.1/jodd-bean-3.7.1.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
