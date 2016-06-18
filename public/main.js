@@ -78,7 +78,11 @@ var app = {
     })
   },
 
-
+    // ----> CLICK BAR to REVIEWPAGE
+    $(.bar).on('click', function(event){
+      (.bars).fadeOut();
+      app.readReview();
+    })
 
 
 
@@ -113,6 +117,25 @@ var app = {
         $('.bars').html('');
         data.forEach(function(element,idx){
           var barString = app.htmlGen(templates.barSummary, element)
+          $('.bars').append(barString);
+        })
+      },
+      error: function(err) {
+        console.log('dang son',err)
+      }
+    })
+  },
+
+  readReview: function(){
+    $.ajax({
+      url: app.url.review,
+      method: "GET",
+      success: function(data){
+        console.log("X gonna give it to ya::reading", data);
+        data = JSON.parse(data);
+        $('.bars').html('');
+        data.forEach(function(element,idx){
+          var barString = app.htmlGen(templates.review, element)
           $('.bars').append(barString);
         })
       },
