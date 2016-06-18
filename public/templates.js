@@ -1,12 +1,12 @@
 var templates = {
-  summary:
+  barSummary:
   `
   <div class='summary img-wrapper' data-id='<%= _id %>'>
     <img class="bar" src="<%= image-url %>" alt="" />
     <span> <%= bar-name %> </span>
   </div>
   `,
-  fullView:
+  barFullView:
   `
   <div class='fullView =' data-id='<%= _id %>'>
     <img class="bar" src="<%= image-url %>" alt="" />

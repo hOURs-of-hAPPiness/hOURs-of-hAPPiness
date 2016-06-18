@@ -16,7 +16,6 @@ var app = {
 
   url: {
     login: "/login",
-    userExist: "/user",
     review: "/get-reviews",
     bars: "/get-bars",
     logout: "/log-out",
@@ -79,21 +78,15 @@ var app = {
     })
   },
 
+
+
+
+
+
+
   // ---->    AJAX REQUESTS
   // ---->
-  userGet: function(url, stuff) {
-    $.ajax({
-      url: app.url.userExist,
-      method: "GET",
-      success: function(data){
-        console.log("X gonna give it to ya::reading", data);
-        if(app.user === data.username)
-      },
-      error: function(err) {
-        console.log('dang son',err)
-      }
-    })
-  },
+
 
   createuser: function(stuff){
     $.ajax({
@@ -109,12 +102,17 @@ var app = {
     })
   },
 
-  read: function(url, stuff){
+  readBar: function(url, stuff){
     $.ajax({
-      url: url,
+      url: url.bars,
       method: "GET",
       success: function(data){
         console.log("X gonna give it to ya::reading", data);
+        $('.bars').html('');
+        data.forEach(function(element,idx){
+          var barString = app.htmlGen(templates.barSummary, element)
+          $('.bars').append(barString);
+        })
       },
       error: function(err) {
         console.log('dang son',err)
