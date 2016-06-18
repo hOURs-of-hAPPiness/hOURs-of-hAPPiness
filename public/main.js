@@ -79,10 +79,10 @@ var app = {
   },
 
     // ----> CLICK BAR to REVIEWPAGE
-    $(.bar).on('click', function(event){
-      (.bars).fadeOut();
+    $('.bar').on('click', function(event){
+      $('.bars').fadeOut();
       app.readReview();
-    })
+    });
 
 
 

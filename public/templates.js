@@ -13,7 +13,7 @@ var templates = {
     <h3> <%= barName %> </h3>
     <span><%= username %></span>
   </div>
-  `
+  `,
   review:
   `
   <div class='review' data-id='<%= reviewId %>'>
