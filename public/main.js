@@ -76,13 +76,17 @@ var app = {
         return false;
       }
     })
-  },
+
 
     // ----> CLICK BAR to REVIEWPAGE
-    $(.bar).on('click', function(event){
-      (.bars).fadeOut();
-      app.readReview();
-    })
+        $('.bars').on('click','.bar', function(event){
+          $('.bars').fadeOut();
+          app.readReview();
+        })
+
+  },
+
+
 
 
 
@@ -136,7 +140,7 @@ var app = {
         $('.bars').html('');
         data.forEach(function(element,idx){
           var barString = app.htmlGen(templates.review, element)
-          $('.bars').append(barString);
+          $('.main-content').append(barString);
         })
       },
       error: function(err) {
