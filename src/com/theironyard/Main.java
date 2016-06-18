@@ -15,7 +15,7 @@ public class Main {
     public static void createTables (Connection conn) throws SQLException {
         Statement stmt = conn.createStatement();
         stmt.execute("CREATE TABLE IF NOT EXISTS users (userId IDENTITY, username VARCHAR)");
-        stmt.execute("CREATE TABLE IF NOT EXISTS bars (barId IDENTITY, barName VARCHAR, barLocation VARCHAR, imageUrl VARCHAR, author VARCHAR, user_id INT)");
+        stmt.execute("CREATE TABLE IF NOT EXISTS bars (barId IDENTITY, barName VARCHAR, barLocation VARCHAR, imageUrl VARCHAR, author VARCHAR)");
         stmt.execute("CREATE TABLE IF NOT EXISTS reviews(reviewId IDENTITY, review VARCHAR, rating INT, author VARCHAR)");
     }
 
