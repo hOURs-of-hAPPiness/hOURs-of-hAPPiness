@@ -15,7 +15,7 @@ public class Main {
     public static void createTables (Connection conn) throws SQLException {
         Statement stmt = conn.createStatement();
         stmt.execute("CREATE TABLE IF NOT EXISTS users (userId IDENTITY, username VARCHAR)");
-        stmt.execute("CREATE TABLE IF NOT EXISTS bars (barId IDENTITY, barName VARCHAR, barLocation VARCHAR, author VARCHAR, user_id INT)");
+        stmt.execute("CREATE TABLE IF NOT EXISTS bars (barId IDENTITY, barName VARCHAR, barLocation VARCHAR, imageUrl VARCHAR, author VARCHAR, user_id INT)");
         stmt.execute("CREATE TABLE IF NOT EXISTS reviews(reviewId IDENTITY, review VARCHAR, rating INT, author VARCHAR, bar_id INT)");
     }
 
@@ -26,7 +26,7 @@ public class Main {
     }
 
     public static User selectUser (Connection conn, String username) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement("SELECT * FROM users WHERE name = ?");
+        PreparedStatement stmt = conn.prepareStatement("SELECT * FROM users WHERE username = ?");
         stmt.setString(1, username);
         ResultSet results = stmt.executeQuery();
         if (results.next()) {
@@ -58,9 +58,8 @@ public class Main {
         return null;
     }
 
-    public static ArrayList<Bar> selectBars(Connection conn, Integer userId) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement("SELECT * FROM bars INNER JOIN users ON bars.user_id = users.userId WHERE users.userId = ?");
-        stmt.setInt(1, userId);
+    public static ArrayList<Bar> selectBars(Connection conn) throws SQLException {
+        PreparedStatement stmt = conn.prepareStatement("SELECT * FROM bars");
         ResultSet results = stmt.executeQuery();
         ArrayList<Bar> bars = new ArrayList<>();
         while (results.next()) {
@@ -156,10 +155,7 @@ public class Main {
 
         Spark.get("/get-bars",
                 (request, response) -> {
-                    Session session = request.session();
-                    String username = session.attribute("username");
-                    User user = selectUser(conn, username);
-                    ArrayList<Bar> bars = selectBars(conn, user.userId);
+                    ArrayList<Bar> bars = selectBars(conn);
                     return serializer.serialize(bars);
                 }
         );
@@ -172,24 +168,18 @@ public class Main {
                 }
         );
 
-        Spark.get(
-                "/user",
-                (request, response) -> {
-                    Session session = request.session();
-                    String username = session.attribute("username");
-                    User user = selectUser(conn, username);
-                    return serializer.serialize(user);
-                }
-        );
-
         Spark.post(
                 "/login",
                 (request, response) -> {
                     String body = request.body();
                     User user = parser.parse(body, User.class);
+                    User userFromDb = selectUser(conn, user.username);
                     Session session = request.session();
                     session.attribute("username", user.username);
-                    insertUser(conn, user);
+                    if (userFromDb == null) {
+                        insertUser(conn, user);
+                    }
+
                     return "";
                 }
         );
@@ -212,14 +202,6 @@ public class Main {
                     return"";
                 }
         );
-
-//        Spark.get(
-//                "/get-bars",
-//                (request, response) -> {
-//                    ArrayList<Bar> bars = selectBars(conn);
-//                    return serializer.serialize(bars);
-//                }
-//        );
 
         Spark.post("/create-review",
                 (request, response) -> {
