@@ -44,7 +44,9 @@ var app = {
     var $password = $('input[type=password]').val();
     console.log("shit submit", app.user);
     if($password === 'poop') {
-      app.createuser({username: app.user})
+      var objToSend = {username: app.user};
+      if (indexof(objToSend) !== )
+      app.createuser(JSON.strinify(objToSend))
       $('.login').fadeOut();
       $('.hoh-main').removeClass("hidden").hide().fadeIn(2000);
     } else {
@@ -86,7 +88,7 @@ var app = {
       method: "GET",
       success: function(data){
         console.log("X gonna give it to ya::reading", data);
-        // if(app.user === data.username)
+        if(app.user === data.username)
       },
       error: function(err) {
         console.log('dang son',err)
