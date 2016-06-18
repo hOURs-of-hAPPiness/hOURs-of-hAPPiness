@@ -45,8 +45,7 @@ var app = {
     console.log("shit submit", app.user);
     if($password === 'poop') {
       var objToSend = {username: app.user};
-      if (indexof(objToSend) !== )
-      app.createuser(JSON.strinify(objToSend))
+      app.createuser(JSON.stringify(objToSend));
       $('.login').fadeOut();
       $('.hoh-main').removeClass("hidden").hide().fadeIn(2000);
     } else {

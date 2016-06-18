@@ -168,8 +168,17 @@ public class Main {
                 (request, response) -> {
                     Integer id = Integer.valueOf(request.params("reviewId"));
                     selectReviews(conn, id);
-
                     return "";
+                }
+        );
+
+        Spark.get(
+                "/user",
+                (request, response) -> {
+                    Session session = request.session();
+                    String username = session.attribute("username");
+                    User user = selectUser(conn, username);
+                    return serializer.serialize(user);
                 }
         );
 
@@ -204,13 +213,13 @@ public class Main {
                 }
         );
 
-        Spark.get(
-                "/get-bars",
-                (request, response) -> {
-                    ArrayList<Bar> bars = selectBars(conn);
-                    return serializer.serialize(bars);
-                }
-        );
+//        Spark.get(
+//                "/get-bars",
+//                (request, response) -> {
+//                    ArrayList<Bar> bars = selectBars(conn);
+//                    return serializer.serialize(bars);
+//                }
+//        );
 
         Spark.post("/create-review",
                 (request, response) -> {
@@ -253,8 +262,6 @@ public class Main {
                     }
 
                     deleteBar(conn, barId);
-
-                    response.redirect("/");
                     return "";
                 }
         );
