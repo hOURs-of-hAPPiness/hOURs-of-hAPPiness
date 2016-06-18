@@ -95,6 +95,7 @@ var app = {
       method: "POST",
       success: function(data){
         console.log("X gonna give it to ya::creating", data);
+        app.readBar();
       },
       error: function(err) {
         console.log('dang son',err)
@@ -102,9 +103,9 @@ var app = {
     })
   },
 
-  readBar: function(url, stuff){
+  readBar: function(){
     $.ajax({
-      url: url.bars,
+      url: app.url.bars,
       method: "GET",
       success: function(data){
         console.log("X gonna give it to ya::reading", data);

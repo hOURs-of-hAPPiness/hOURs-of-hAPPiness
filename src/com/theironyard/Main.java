@@ -110,9 +110,8 @@ public class Main {
         return null;
     }
 
-    public static ArrayList<Review> selectReviews(Connection conn, Integer barId) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement("SELECT * FROM reviews INNER JOIN bars ON reviews.bar_id = bars.barId WHERE bars.barId = ?");
-        stmt.setInt(1, barId);
+    public static ArrayList<Review> selectReviews(Connection conn) throws SQLException {
+        PreparedStatement stmt = conn.prepareStatement("SELECT * FROM reviews");
         ResultSet results = stmt.executeQuery();
         ArrayList<Review> reviewList = new ArrayList<>();
         while (results.next()) {
@@ -162,9 +161,8 @@ public class Main {
 
         Spark.get("/get-reviews",
                 (request, response) -> {
-                    Integer id = Integer.valueOf(request.params("reviewId"));
-                    selectReviews(conn, id);
-                    return "";
+                    ArrayList<Review> reviews = selectReviews(conn);
+                    return serializer.serialize(reviews);
                 }
         );
 
