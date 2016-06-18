@@ -1,21 +1,50 @@
+// ---->   HOURS OF HAPPINESS
+// ---->   INITIALIZE APP WHEN DOCUTMENT IS READY
+// ---->    created by: Caleb Bodtorf :: 6/18/16
+
 $('document').ready(function(){
   app.init();
+  initLocalClocks();
+  moveSecondHands();
 })
 
+// ---->    OBJECT MODEL app
+
 var app = {
+
+  // ---->    urls from database
+
+  url: {
+    login: "/login",
+    userExist: "/user",
+    review: "/get-reviews",
+    bars: "/get-bars",
+    logout: "/log-out",
+    createbar: "/create-bar",
+    getbars: "/get-bars",
+    createreview: "/create-review",
+    editreview: "/edit-review",
+    deletebar: "/delete-bar/:id",
+    deletereview: "/delete-review"
+  },
+
+  // ---->     stores username to reduce calls to server
+
   user: '',
   init: function(){
     app.events();
     app.styling();
   },
-  
-  //login function to be used on click and enter events.
+
+  // ---->    login function to be used on click and enter events.
+
   loginSubmit: function(){
     event.preventDefault();
     app.user = $('input[name=username]').val();
     var $password = $('input[type=password]').val();
     console.log("shit submit", app.user);
     if($password === 'poop') {
+      app.createuser({username: app.user})
       $('.login').fadeOut();
       $('.hoh-main').removeClass("hidden").hide().fadeIn(2000);
     } else {
@@ -23,35 +52,51 @@ var app = {
     }
   },
 
+  // ---->    STYLING
+  // ---->    replaces default w/ username
+
   styling: function(){
-    // replaces default w/ username
     $('.welcome').text(`${app.user}, Welcome to The Secret Society of Happiness`);
 
   },
   events: function(){
 
-    //submit & store username and password on click
+    // ---->    SUBMIT on CLICK
     $('button[type=button]').on('click', function(event){
       app.loginSubmit();
-      // change welcome message w/ user name
       app.styling();
     })
 
-    //submit & store username and password on enter
+    // ---->    SUBMIT on ENTER
     $('.login').on('keypress click', function(event){
     var keyCode = event.keyCode || event.which;
       if (keyCode === 13) {
         app.loginSubmit();
-        // change welcome message w/ user name
         app.styling();
         return false;
       }
     })
   },
 
-  create: function(stuff){
+  // ---->    AJAX REQUESTS
+  // ---->
+  userGet: function(url, stuff) {
     $.ajax({
-      url: app.url,
+      url: app.url.userExist,
+      method: "GET",
+      success: function(data){
+        console.log("X gonna give it to ya::reading", data);
+        // if(app.user === data.username)
+      },
+      error: function(err) {
+        console.log('dang son',err)
+      }
+    })
+  },
+
+  createuser: function(stuff){
+    $.ajax({
+      url: app.url.login,
       data: stuff,
       method: "POST",
       success: function(data){
@@ -62,9 +107,10 @@ var app = {
       }
     })
   },
-  read: function(){
+
+  read: function(url, stuff){
     $.ajax({
-      url: app.url,
+      url: url,
       method: "GET",
       success: function(data){
         console.log("X gonna give it to ya::reading", data);
@@ -74,6 +120,7 @@ var app = {
       }
     })
   },
+
   update: function(stuff){
     $.ajax({
       url: app.url + "/" + stuff._id,
@@ -87,6 +134,7 @@ var app = {
       }
     })
   },
+
   delete: function(stuffId){
     var deleteUrl = app.url + "/" + stuffId;
     $.ajax({
@@ -101,7 +149,15 @@ var app = {
       }
     })
   },
-  template: function(){
 
+  // ---->    MERGES TEMPLATES.JS W/ DATA
+  // ---->    arguement example: templates.summary
+
+  templater: function(template){
+    return _.template(template);
+  },
+  htmlGen: function (template, data){
+    var tmpl = app.templater(template);
+    return tmpl(data);
   }
 }
