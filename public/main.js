@@ -44,12 +44,25 @@ var app = {
     console.log("shit submit", app.user);
     if($password === 'poop') {
       var objToSend = {username: app.user};
-      app.createuser(JSON.stringify(objToSend));
+      app.createUser(JSON.stringify(objToSend));
       $('.login').fadeOut();
       $('.hoh-main').removeClass("hidden").hide().fadeIn(2000);
     } else {
       $('input[type=password]').val('').attr('placeholder','wrong password!');
     }
+  },
+
+  // ---->    form submit for creating new bar from plus buttom.
+
+  barSubmit: function(){
+    event.preventDefault();
+    var objToSend =
+      {barName: $('input[name=barName]').val(),
+      barLocation: $('input[name=location]').val(),
+      imageUrl: $('input[name=imageUrl]').val()
+    };
+    console.log("bar", objToSend);
+    app.createBar(JSON.stringify(objToSend));
   },
 
   // ---->    STYLING
@@ -62,7 +75,7 @@ var app = {
   events: function(){
 
     // ---->    SUBMIT on CLICK
-    $('button[type=button]').on('click', function(event){
+    $('button[name=button]').on('click', function(event){
       app.loginSubmit();
       app.styling();
     })
@@ -77,11 +90,21 @@ var app = {
       }
     })
 
-
     // ----> CLICK BAR to REVIEWPAGE
         $('.bars').on('click','.bar', function(event){
           $('.bars').fadeOut();
           app.readReview();
+        })
+
+    // ----> CLICK PLUS to SHOW BAR FORM
+        $('.plus').on('click', function (){
+          $('.barInput').slideToggle("slow", function(event){
+          })
+        })
+
+        // ---->    SUBMIT ADD BAR on CLICK
+        $('button[name=barSubmit]').on('click', function(event){
+          app.barSubmit();
         })
 
   },
@@ -95,13 +118,28 @@ var app = {
   // ---->
 
 
-  createuser: function(stuff){
+  createUser: function(stuff){
     $.ajax({
       url: app.url.login,
       data: stuff,
       method: "POST",
       success: function(data){
-        console.log("X gonna give it to ya::creating", data);
+        console.log("X gonna give it to ya::creatingUser", data);
+        app.readBar();
+      },
+      error: function(err) {
+        console.log('dang son',err)
+      }
+    })
+  },
+
+  createBar: function(stuff){
+    $.ajax({
+      url: app.url.createbar,
+      data: stuff,
+      method: "POST",
+      success: function(data){
+        console.log("X gonna give it to ya::creatingBar", data);
         app.readBar();
       },
       error: function(err) {

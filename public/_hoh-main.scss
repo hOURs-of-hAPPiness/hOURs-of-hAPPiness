@@ -1,8 +1,18 @@
 nav{
   background-color: $grey;
   width: 100%;
+  display: flex;
+  justify-content: space-around;
   h1 {
     color: $black;
+    margin-left: 10px;
+    display: inline-block;
+  }
+  img {
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    align-self: center;
   }
 }
 .main-content {
@@ -11,6 +21,22 @@ nav{
   margin-bottom: 20px;
   width: 100%;
 }
+.barInput {
+  width: 100%;
+  margin: 0 auto;
+  span {
+    text-align: center;
+    font-size: 3em;
+  }
+  input {
+    width: 100%;
+    margin: 0 auto;
+  }
+  button {
+    width: 100%;
+  }
+}
+
 footer {
   background-color: $grey;
   display: inline-flex;
@@ -40,4 +66,10 @@ footer {
   background-color: white;
   color: blue;
   font-size: 2em;
+}
+.barInput {
+  background-color: white;
+}
+.reviewInput {
+  background-color: blue;
 }

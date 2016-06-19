@@ -138,15 +138,36 @@ body {
 
 nav {
   background-color: #A9A9A9;
-  width: 100%; }
+  width: 100%;
+  display: flex;
+  justify-content: space-around; }
   nav h1 {
-    color: #292931; }
+    color: #292931;
+    margin-left: 10px;
+    display: inline-block; }
+  nav img {
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    align-self: center; }
 
 .main-content {
   background-color: #A9A9A9;
   margin-top: 20px;
   margin-bottom: 20px;
   width: 100%; }
+
+.barInput {
+  width: 100%;
+  margin: 0 auto; }
+  .barInput span {
+    text-align: center;
+    font-size: 3em; }
+  .barInput input {
+    width: 100%;
+    margin: 0 auto; }
+  .barInput button {
+    width: 100%; }
 
 footer {
   background-color: #A9A9A9;
@@ -174,3 +195,9 @@ footer {
   background-color: white;
   color: blue;
   font-size: 2em; }
+
+.barInput {
+  background-color: white; }
+
+.reviewInput {
+  background-color: blue; }
