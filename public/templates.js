@@ -1,17 +1,25 @@
 var templates = {
-  summary:
+  barSummary:
   `
-  <div class='summary img-wrapper' data-id='<%= _id %>'>
-    <img class="bar" src="<%= image-url %>" alt="" />
-    <span> <%= bar-name %> </span>
+  <div class='summary img-wrapper' data-id='<%= barId %>'>
+    <img class="bar" src="<%= imageUrl %>" alt="" />
+    <span> <%= barName %> </span>
   </div>
   `,
-  fullView:
+  barFullView:
   `
-  <div class='fullView =' data-id='<%= _id %>'>
-    <img class="bar" src="<%= image-url %>" alt="" />
-    <h3> <%= bar-name %> </h3>
+  <div class='fullView' data-id='<%= barId %>'>
+    <img class="bar" src="<%= imageUrl %>" alt="" />
+    <h3> <%= barName %> </h3>
     <span><%= username %></span>
+  </div>
+  `,
+  review:
+  `
+  <div class='review' data-id='<%= reviewId %>'>
+    <p> <%= review %> </p>
+    <span> <%= rating %> </span>
+    <span> <%= author %> </span>
   </div>
   `
 }
