@@ -15,8 +15,8 @@ public class Main {
     public static void createTables (Connection conn) throws SQLException {
         Statement stmt = conn.createStatement();
         stmt.execute("CREATE TABLE IF NOT EXISTS users (userId IDENTITY, username VARCHAR)");
-        stmt.execute("CREATE TABLE IF NOT EXISTS bars (barId IDENTITY, barName VARCHAR, barLocation VARCHAR, imageUrl VARCHAR, author VARCHAR)");
-        stmt.execute("CREATE TABLE IF NOT EXISTS reviews(reviewId IDENTITY, review VARCHAR, rating INT, author VARCHAR)");
+        stmt.execute("CREATE TABLE IF NOT EXISTS bars (barId IDENTITY, barName VARCHAR, barLocation VARCHAR, imageUrl VARCHAR, author VARCHAR, user_id INT)");
+        stmt.execute("CREATE TABLE IF NOT EXISTS reviews(reviewId IDENTITY, review VARCHAR, rating INT, author VARCHAR, , bar_id INT)");
     }
 
     public static void insertUser (Connection conn, User user) throws SQLException {
@@ -60,7 +60,7 @@ public class Main {
     }
 
     public static ArrayList<Bar> selectBars(Connection conn) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement("SELECT * FROM bars");
+        PreparedStatement stmt = conn.prepareStatement("SELECT * FROM bars INNER JOIN users ON bars.user_id = users.userId WHERE users.userId = ?");
         ResultSet results = stmt.executeQuery();
         ArrayList<Bar> bars = new ArrayList<>();
         while (results.next()) {
@@ -112,7 +112,7 @@ public class Main {
     }
 
     public static ArrayList<Review> selectReviews(Connection conn) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement("SELECT * FROM reviews");
+        PreparedStatement stmt = conn.prepareStatement("SELECT * FROM reviews INNER JOIN bars ON reviews.bar_id = bars.barId WHERE bars.barId = ?");
         ResultSet results = stmt.executeQuery();
         ArrayList<Review> reviewList = new ArrayList<>();
         while (results.next()) {
@@ -247,9 +247,18 @@ public class Main {
                 }
         );
 
-        Spark.delete("/delete-review",
+        Spark.delete("/delete-review/:id",
                 (request, response) -> {
-                    Integer reviewId = Integer.valueOf(request.params("reviewId"));
+                    Integer reviewId = Integer.valueOf(request.params("id"));
+
+                    Session session = request.session();
+                    String username = session.attribute("username");
+                    Review r = selectReview(conn, reviewId);
+
+                    if (r.author.equals(username)) {
+                        throw new Exception("Unable to delete");
+                    }
+
                     deleteReview(conn, reviewId);
                     return "";
                 }
