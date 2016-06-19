@@ -247,9 +247,18 @@ public class Main {
                 }
         );
 
-        Spark.delete("/delete-review",
+        Spark.delete("/delete-review/:id",
                 (request, response) -> {
-                    Integer reviewId = Integer.valueOf(request.params("reviewId"));
+                    Integer reviewId = Integer.valueOf(request.params("id"));
+
+                    Session session = request.session();
+                    String username = session.attribute("username");
+                    Review r = selectReview(conn, reviewId);
+
+                    if (r.author.equals(username)) {
+                        throw new Exception("Unable to delete");
+                    }
+
                     deleteReview(conn, reviewId);
                     return "";
                 }
