@@ -10,7 +10,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "start": "node-sass styles.scss main.css -w & serve"
+    "start": "node-sass styles.scss main.css -w"
   },
   "author": "",
   "license": "ISC"
